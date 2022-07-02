@@ -147,7 +147,7 @@ public abstract class AbstractStoreUploadController extends AbstractCatalogContr
     /** Build name for an uploaded file. */
     private String buildUploadedFilename(String store, String format) {
         if ("h2".equalsIgnoreCase(format)) {
-            return store + ".data.db";
+            return store + ".mv.db";
         } else {
             return store + "." + format;
         }

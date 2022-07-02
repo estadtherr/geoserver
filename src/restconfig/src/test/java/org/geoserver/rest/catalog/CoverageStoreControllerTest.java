@@ -6,10 +6,8 @@
 package org.geoserver.rest.catalog;
 
 import static org.custommonkey.xmlunit.XMLAssert.assertXpathEvaluatesTo;
-import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -554,8 +552,12 @@ public class CoverageStoreControllerTest extends CatalogRESTTestSupport {
                                 Files.asResource(loader.getBaseDirectory()),
                                 "data/wcs/mosaicfordelete"),
                         true);
-        File[] content = storeDir.listFiles();
-        assertThat(content.length, anyOf(equalTo(9), equalTo(10), equalTo(11)));
+        assertNotNull(storeDir);
+        File[] content =
+                storeDir.listFiles(
+                        (path, name) -> !(name.startsWith("empty.") && name.endsWith(".db")));
+        assertNotNull(content);
+        assertEquals(content.length, 6);
 
         assertEquals(
                 200,
@@ -565,6 +567,7 @@ public class CoverageStoreControllerTest extends CatalogRESTTestSupport {
                                         + purge)
                         .getStatus());
         content = storeDir.listFiles();
+        assertNotNull(content);
 
         // purge all: no files remaining; purge metadata: only 1 Granule remaining; purge none: all
         // files (11) remaining

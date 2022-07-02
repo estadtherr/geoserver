@@ -47,8 +47,7 @@
   <!--bean id="mockWMSSource" class="org.geowebcache.util.MockWMSLayerSource"> <description>REMOVE THIS, it's a fake WMS 
     source for all layers!!!</description> <constructor-arg ref="gwcTLDispatcher" /> </bean -->
 
-
-  <bean id="jdbcQuotaStoreFactory" class="org.geowebcache.diskquota.jdbc.JDBCQuotaStoreFactory">
+  <bean id="jdbcQuotaStoreFactory" class="org.geoserver.gwc.JDBCH2QuotaStoreFactory">
    <constructor-arg ref="jdbcDiskQuotaConfigResourceProvider" />
   </bean>
   

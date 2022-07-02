@@ -85,7 +85,7 @@ public final class RestTest extends GeoServerSystemTestSupport {
     public void createDataStoreUsingRestSingleFile() throws Exception {
         String dataStoreName = "h2-test-db-single";
         // send only the database file
-        byte[] content = readSqLiteDatabaseFile();
+        byte[] content = readH2DatabaseFile();
         genericCreateDataStoreUsingRestTest(dataStoreName, "application/octet-stream", content);
     }
 
@@ -93,7 +93,7 @@ public final class RestTest extends GeoServerSystemTestSupport {
     public void createDataStoreUsingRestZipFile() throws Exception {
         String dataStoreName = "h2-test-db-zip";
         // send the database directory
-        byte[] content = readSqLiteDatabaseDir();
+        byte[] content = readH2DatabaseDir();
         genericCreateDataStoreUsingRestTest(dataStoreName, "application/zip", content);
     }
 
@@ -136,9 +136,9 @@ public final class RestTest extends GeoServerSystemTestSupport {
     /**
      * Helper method that just reads the test H2 database file and stores it in a array of bytes.
      */
-    private static byte[] readSqLiteDatabaseFile() throws Exception {
+    private static byte[] readH2DatabaseFile() throws Exception {
         // open the database file
-        try (InputStream input = RestTest.class.getResourceAsStream("/test-database.data.db");
+        try (InputStream input = RestTest.class.getResourceAsStream("/test-database.mv.db");
                 ByteArrayOutputStream output = new ByteArrayOutputStream()) {
             // copy the input stream to the output stream
             IOUtils.copy(input, output);
@@ -150,10 +150,10 @@ public final class RestTest extends GeoServerSystemTestSupport {
     }
 
     /** Helper method that zips the H2 data directory and returns it as an array of bytes. */
-    private static byte[] readSqLiteDatabaseDir() throws Exception {
+    private static byte[] readH2DatabaseDir() throws Exception {
         // copy database file to database directory
-        File outputFile = new File(DATABASE_DIR, "test-database.data.db");
-        try (InputStream input = RestTest.class.getResourceAsStream("/test-database.data.db")) {
+        File outputFile = new File(DATABASE_DIR, "test-database.mv.db");
+        try (InputStream input = RestTest.class.getResourceAsStream("/test-database.mv.db")) {
             IOUtils.copy(input, new FileOutputStream(outputFile));
         }
         // zip the database directory

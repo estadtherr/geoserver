@@ -625,8 +625,9 @@ public class ImporterDataTest extends ImporterTestSupport {
         assertEquals(State.ERROR, task.getState());
         assertThat(
                 task.getError().getCause().getMessage(),
-                CoreMatchers.containsString(
-                        "Unique index or primary key violation: archsites_cat_ids"));
+                allOf(
+                        CoreMatchers.containsString("Unique index or primary key violation:"),
+                        CoreMatchers.containsString("archsites_cat_ids")));
     }
 
     @Test

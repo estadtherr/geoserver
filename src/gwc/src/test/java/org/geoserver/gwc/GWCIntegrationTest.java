@@ -1365,7 +1365,7 @@ public class GWCIntegrationTest extends GeoServerSystemTestSupport {
         jdbc.setDialect("H2");
         ConnectionPoolConfiguration pool = new ConnectionPoolConfiguration();
         pool.setDriver("org.h2.Driver");
-        pool.setUrl("jdbc:h2:./target/quota-h2");
+        pool.setUrl("jdbc:h2:./target/quota-h2;NON_KEYWORDS=KEY");
         pool.setUsername("sa");
         pool.setPassword("");
         pool.setMinConnections(1);
@@ -1378,7 +1378,7 @@ public class GWCIntegrationTest extends GeoServerSystemTestSupport {
                 dd.findFile(jdbcConfigPath));
         assertNull(
                 "jdbc store (" + h2StorePath + ") should be there", dd.findDataFile(h2StorePath));
-        File newQuotaStore = new File("./target/quota-h2.data.db");
+        File newQuotaStore = new File("./target/quota-h2.mv.db");
         assertTrue(newQuotaStore.exists());
 
         File jdbcConfigFile = dd.findFile(jdbcConfigPath);

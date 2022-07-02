@@ -84,7 +84,7 @@ public class DataStoreFileController extends AbstractStoreUploadController {
         super(catalog);
     }
 
-    private static final Pattern H2_FILE_PATTERN = Pattern.compile("(.*?)\\.(?:data.db)");
+    private static final Pattern H2_FILE_PATTERN = Pattern.compile("(.*?)\\.(?:mv.db)");
 
     protected static final HashMap<String, String> formatToDataStoreFactory = new HashMap<>();
 
@@ -701,9 +701,7 @@ public class DataStoreFileController extends AbstractStoreUploadController {
             if (f.isDirectory()) {
                 // if the user uploaded a ZIP file we need to get the database file inside
                 Optional<Resource> found =
-                        Resources.list(
-                                        uploadedFile,
-                                        resource -> resource.name().endsWith("data.db"))
+                        Resources.list(uploadedFile, resource -> resource.name().endsWith("mv.db"))
                                 .stream()
                                 .findFirst();
                 if (!found.isPresent()) {

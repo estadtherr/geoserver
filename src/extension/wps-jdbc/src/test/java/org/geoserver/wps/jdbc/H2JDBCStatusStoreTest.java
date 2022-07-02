@@ -17,7 +17,8 @@ public class H2JDBCStatusStoreTest extends AbstractJDBCStatusStoreTest {
     protected Properties getFixture() {
         Properties fixture = new Properties();
         fixture.put("driver", "org.h2.Driver");
-        fixture.put("url", "jdbc:h2:target/wps-store");
+        fixture.put("url", "jdbc:h2:./target/wps-store");
+        fixture.put("database", "./target/wps-store");
         fixture.put("user", "geotools");
         fixture.put("password", "geotools");
         fixture.put("dbtype", "h2");

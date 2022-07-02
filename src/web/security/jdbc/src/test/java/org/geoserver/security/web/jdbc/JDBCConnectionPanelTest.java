@@ -136,7 +136,7 @@ public class JDBCConnectionPanelTest extends AbstractSecurityWicketTestSupport {
         theConfig.setUserName("user1");
         theConfig.setPassword("pw");
         theConfig.setDriverClassName("org.h2.Driver");
-        theConfig.setConnectURL("jdbc:h2:file:target/db");
+        theConfig.setConnectURL("jdbc:h2:./target/db");
 
         setupPanel(theConfig);
         tester.assertRenderedPage(FormTestPage.class);

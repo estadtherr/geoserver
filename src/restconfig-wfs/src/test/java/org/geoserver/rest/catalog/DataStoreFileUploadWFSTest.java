@@ -259,7 +259,7 @@ public class DataStoreFileUploadWFSTest extends CatalogRESTTestSupport {
                         + "<namespace>"
                         + MockData.DEFAULT_URI
                         + "</namespace>"
-                        + "<database>target/foo</database>"
+                        + "<database>./target/foo</database>"
                         + "<dbtype>h2</dbtype>"
                         + " </connectionParameters>"
                         + "<workspace>gs</workspace>"

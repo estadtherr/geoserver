@@ -15,8 +15,10 @@ import org.geoserver.geofence.services.dto.ShortAdminRule;
 import org.geoserver.web.GeoServerWicketTestSupport;
 import org.geoserver.web.wicket.GeoServerTablePanel;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
+@Ignore // geofence library does not support H2 database v2.0
 public class GeofenceServerPageTest extends GeoServerWicketTestSupport {
 
     static GeoFencePropertyPlaceholderConfigurer configurer;
