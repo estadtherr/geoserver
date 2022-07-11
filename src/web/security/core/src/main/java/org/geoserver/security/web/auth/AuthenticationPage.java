@@ -25,11 +25,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.Part;
+import javax.servlet.http.*;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
@@ -489,6 +485,11 @@ public class AuthenticationPage extends AbstractSecurityPage {
                                 }
 
                                 @Override
+                                public long getContentLengthLong() {
+                                    return 0;
+                                }
+
+                                @Override
                                 public String getCharacterEncoding() {
                                     return null;
                                 }
@@ -544,6 +545,13 @@ public class AuthenticationPage extends AbstractSecurityPage {
                                 }
 
                                 @Override
+                                public <T extends HttpUpgradeHandler> T upgrade(
+                                        Class<T> handlerClass)
+                                        throws IOException, ServletException {
+                                    return null;
+                                }
+
+                                @Override
                                 public boolean isRequestedSessionIdFromURL() {
                                     return false;
                                 }
@@ -565,6 +573,11 @@ public class AuthenticationPage extends AbstractSecurityPage {
 
                                 @Override
                                 public HttpSession getSession() {
+                                    return null;
+                                }
+
+                                @Override
+                                public String changeSessionId() {
                                     return null;
                                 }
 

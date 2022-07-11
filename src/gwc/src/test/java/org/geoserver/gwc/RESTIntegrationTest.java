@@ -40,7 +40,6 @@ import org.custommonkey.xmlunit.XpathEngine;
 import org.geoserver.catalog.Catalog;
 import org.geoserver.data.test.MockData;
 import org.geoserver.data.test.SystemTestData;
-import org.geoserver.filters.BufferedRequestWrapper;
 import org.geoserver.gwc.layer.GeoServerTileLayer;
 import org.geoserver.gwc.layer.GeoServerTileLayerInfo;
 import org.geoserver.gwc.layer.StyleParameterFilter;
@@ -620,17 +619,12 @@ public class RESTIntegrationTest extends GeoServerSystemTestSupport {
         final String formData =
                 "threadCount=01&type=seed&gridSetId=EPSG%3A4326&tileFormat=image%2Fpng&zoomStart=00&zoomStop=12&minX=&minY=&maxX=&maxY=";
 
-        // Manually construct request and wrap in BufferedRequestWrapper so that the form data gets
-        // parsed as parameters
         MockHttpServletRequest request = createRequest(url);
         request.setMethod("POST");
         request.setContentType("application/x-www-form-urlencoded");
         request.setContent(formData.getBytes(UTF_8));
 
-        BufferedRequestWrapper wrapper =
-                new BufferedRequestWrapper(request, "UTF-8", formData.getBytes(UTF_8));
-
-        MockHttpServletResponse sr = dispatch(wrapper);
+        MockHttpServletResponse sr = dispatch(request);
 
         assertEquals(200, sr.getStatus());
         assertSeedJob(layerName);
@@ -713,17 +707,12 @@ public class RESTIntegrationTest extends GeoServerSystemTestSupport {
 
         final String formData = "reload_configuration=1";
 
-        // Manually construct request and wrap in BufferedRequestWrapper so that the form data gets
-        // parsed as parameters
         MockHttpServletRequest request = createRequest(url);
         request.setMethod("POST");
         request.setContentType("application/x-www-form-urlencoded");
         request.setContent(formData.getBytes(UTF_8));
 
-        BufferedRequestWrapper wrapper =
-                new BufferedRequestWrapper(request, "UTF-8", formData.getBytes(UTF_8));
-
-        MockHttpServletResponse sr = dispatch(wrapper);
+        MockHttpServletResponse sr = dispatch(request);
 
         assertEquals(200, sr.getStatus());
     }

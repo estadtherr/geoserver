@@ -9,10 +9,7 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.*;
 import org.junit.Test;
 import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockFilterConfig;
@@ -64,6 +61,16 @@ public class FlushSafeFilterTest {
                             final ServletOutputStream wrapped = super.getOutputStream();
                             os =
                                     new ServletOutputStream() {
+                                        @Override
+                                        public boolean isReady() {
+                                            return wrapped.isReady();
+                                        }
+
+                                        @Override
+                                        public void setWriteListener(WriteListener writeListener) {
+                                            wrapped.setWriteListener(writeListener);
+                                        }
+
                                         boolean closed;
 
                                         @Override
@@ -82,7 +89,7 @@ public class FlushSafeFilterTest {
                                             if (closed) {
                                                 // we should never reach this code
                                                 throw new RuntimeException(
-                                                        "Aaarg, I'm already closed, your JVM shall die now!");
+                                                        "Aaargh, I'm already closed, your JVM shall die now!");
                                             }
                                             wrapped.flush();
                                         }

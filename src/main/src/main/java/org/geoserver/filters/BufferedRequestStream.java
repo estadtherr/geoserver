@@ -7,43 +7,20 @@ package org.geoserver.filters;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
 
 /**
- * Wrap a String up as a ServletInputStream so we can read it multiple times.
+ * Wrap a request body as a ServletInputStream so we can read it multiple times.
  *
  * @author David Winslow <dwinslow@openplans.org>
  */
 public class BufferedRequestStream extends ServletInputStream {
-    InputStream myInputStream;
+
+    ByteArrayInputStream myInputStream;
 
     public BufferedRequestStream(byte[] buff) throws IOException {
         myInputStream = new ByteArrayInputStream(buff);
-        myInputStream.mark(16);
-        myInputStream.read();
-        myInputStream.reset();
-    }
-
-    public BufferedRequestStream(InputStream inputStream) throws IOException {
-        myInputStream = inputStream;
-    }
-
-    @Override
-    public int readLine(byte[] b, int off, int len) throws IOException {
-        int read;
-        int index = off;
-        int end = off + len;
-
-        while (index < end && (read = myInputStream.read()) != -1) {
-            b[index] = (byte) read;
-            index++;
-            if (((char) read) == '\n') {
-                break;
-            }
-        }
-
-        return index - off;
     }
 
     @Override
@@ -52,7 +29,17 @@ public class BufferedRequestStream extends ServletInputStream {
     }
 
     @Override
-    public int available() throws IOException {
-        return myInputStream.available();
+    public boolean isFinished() {
+        return myInputStream.available() == 0;
+    }
+
+    @Override
+    public boolean isReady() {
+        return myInputStream.available() > 0;
+    }
+
+    @Override
+    public void setReadListener(ReadListener readListener) {
+        throw new UnsupportedOperationException("cannot use read listener with buffered request");
     }
 }

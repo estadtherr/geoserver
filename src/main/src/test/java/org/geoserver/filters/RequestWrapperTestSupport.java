@@ -39,6 +39,7 @@ public class RequestWrapperTestSupport {
 
         request.setMethod("POST");
         request.setContent(body.getBytes(StandardCharsets.UTF_8));
+        request.setCharacterEncoding(StandardCharsets.UTF_8.name());
 
         MockHttpSession session = new MockHttpSession(new MockServletContext());
         request.setSession(session);

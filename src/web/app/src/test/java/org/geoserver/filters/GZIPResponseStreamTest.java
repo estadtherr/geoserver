@@ -26,7 +26,7 @@ public class GZIPResponseStreamTest {
     public void testStream() throws Exception {
         ByteStreamCapturingHttpServletResponse response =
                 new ByteStreamCapturingHttpServletResponse(new MockHttpServletResponse());
-        try (GZIPResponseStream stream = new GZIPResponseStream(response)) {
+        try (GZIPResponseStream stream = new GZIPResponseStream(response.getOutputStream())) {
             stream.write("Hello world!".getBytes());
             stream.flush();
         }
@@ -42,7 +42,7 @@ public class GZIPResponseStreamTest {
         }
 
         byte[] results = new byte[builder.size()];
-        for (int i = 0; i < builder.size(); i++) results[i] = builder.get(i).byteValue();
+        for (int i = 0; i < builder.size(); i++) results[i] = builder.get(i);
         return results;
     }
 

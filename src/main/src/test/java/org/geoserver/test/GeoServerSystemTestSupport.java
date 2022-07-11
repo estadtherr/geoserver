@@ -40,10 +40,7 @@ import java.util.logging.Level;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
-import javax.servlet.Filter;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletInputStream;
+import javax.servlet.*;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -2401,7 +2398,7 @@ public class GeoServerSystemTestSupport extends GeoServerBaseTestSupport<SystemT
 
             if (myBody == null || myMark < 0 || myMark >= myBody.length) {
                 if (myBody == null || myBody.length == 0) {
-                    // This prevents an annoying error when the sting is empty or null
+                    // This prevents an annoying error when the string is empty or null
                     return;
                 }
                 throw new IllegalStateException("Can't reset when no mark was set.");
@@ -2454,6 +2451,21 @@ public class GeoServerSystemTestSupport extends GeoServerBaseTestSupport<SystemT
             myOffset += i;
 
             return i;
+        }
+
+        @Override
+        public boolean isFinished() {
+            return myOffset == myBody.length;
+        }
+
+        @Override
+        public boolean isReady() {
+            return true;
+        }
+
+        @Override
+        public void setReadListener(ReadListener readListener) {
+            throw new UnsupportedOperationException();
         }
     }
 

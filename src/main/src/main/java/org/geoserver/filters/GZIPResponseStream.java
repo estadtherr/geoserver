@@ -7,7 +7,7 @@ package org.geoserver.filters;
 import java.io.IOException;
 import java.util.zip.GZIPOutputStream;
 import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.WriteListener;
 
 /**
  * A simple streaming gzipping servlet output stream wrapper
@@ -15,40 +15,28 @@ import javax.servlet.http.HttpServletResponse;
  * @author Andrea Aime - GeoSolutions
  */
 public class GZIPResponseStream extends ServletOutputStream {
-    protected final ServletOutputStream delegateStream;
-    protected GZIPOutputStream gzipstream = null;
+    protected GZIPOutputStream gzipStream;
+    protected ServletOutputStream delegateStream;
 
-    protected boolean closed = false;
-
-    public GZIPResponseStream(HttpServletResponse response) throws IOException {
+    public GZIPResponseStream(ServletOutputStream delegateStream) throws IOException {
         super();
-        closed = false;
-        delegateStream = response.getOutputStream();
-        gzipstream = new GZIPOutputStream(delegateStream, 4096, true);
+        this.delegateStream = delegateStream;
+        gzipStream = new GZIPOutputStream(delegateStream, 4096, true);
     }
 
     @Override
     public void close() throws IOException {
-        if (closed) {
-            throw new IOException("This output stream has already been closed");
-        }
-        gzipstream.finish();
-        closed = true;
+        gzipStream.close();
     }
 
     @Override
     public void flush() throws IOException {
-        if (!closed) {
-            gzipstream.flush();
-        }
+        gzipStream.flush();
     }
 
     @Override
-    public void write(int b) throws IOException {
-        if (closed) {
-            throw new IOException("Cannot write to a closed output stream");
-        }
-        gzipstream.write((byte) b);
+    public void write(int i) throws IOException {
+        gzipStream.write(i);
     }
 
     @Override
@@ -58,13 +46,16 @@ public class GZIPResponseStream extends ServletOutputStream {
 
     @Override
     public void write(byte[] b, int off, int len) throws IOException {
-        if (closed) {
-            throw new IOException("Cannot write to a closed output stream");
-        }
-        gzipstream.write(b, off, len);
+        gzipStream.write(b, off, len);
     }
 
-    public boolean closed() {
-        return (this.closed);
+    @Override
+    public boolean isReady() {
+        return delegateStream.isReady();
+    }
+
+    @Override
+    public void setWriteListener(WriteListener writeListener) {
+        delegateStream.setWriteListener(writeListener);
     }
 }

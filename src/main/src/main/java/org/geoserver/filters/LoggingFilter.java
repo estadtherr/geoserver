@@ -5,18 +5,10 @@
  */
 package org.geoserver.filters;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
-import java.nio.charset.IllegalCharsetNameException;
 import java.util.Enumeration;
 import java.util.logging.Logger;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import org.geoserver.catalog.MetadataMap;
 import org.geoserver.config.GeoServer;
@@ -108,7 +100,6 @@ public class LoggingFilter implements GeoServerFilter {
         }
 
         String message = "";
-        String body = null;
         String path = "";
 
         if (enabled) {
@@ -148,36 +139,15 @@ public class LoggingFilter implements GeoServerFilter {
                     message += " request-size: " + hreq.getContentLength();
                     message += " body: ";
 
-                    String encoding = hreq.getCharacterEncoding();
-                    if (encoding == null) {
-                        // the default encoding for HTTP 1.1
-                        encoding = "ISO-8859-1";
-                    }
-                    try (InputStream is = hreq.getInputStream()) {
-
-                        Charset charset = Charset.defaultCharset();
-                        try {
-                            charset = Charset.forName(encoding);
-                        } catch (IllegalCharsetNameException icn) {
-                            logger.info(
-                                    "Request character set not recognized, defaulting to ISO-8859-1");
-                        }
-                        float maxBytesPerCharacter = charset.newEncoder().maxBytesPerChar();
-                        int byteSize = (int) (requestLogBufferSize * (double) maxBytesPerCharacter);
-                        byte[] reqCharacters = new byte[byteSize];
-                        BufferedInputStream bufferedStream = new BufferedInputStream(is);
-                        bufferedStream.mark(byteSize);
-                        bufferedStream.read(reqCharacters, 0, byteSize);
-                        body = new String(reqCharacters, encoding).trim();
-                        bufferedStream.reset();
-                        req = new BufferedRequestWrapper(hreq, encoding, bufferedStream);
-                    }
-
+                    BufferedRequestWrapper bodyCachingRequest = new BufferedRequestWrapper(hreq);
                     if (isBinary(hreq.getHeader("Content-type"))) {
-                        message += " bytes (binary content)\n";
+                        byte[] body = bodyCachingRequest.getRequestBodyBytes();
+                        message += (body != null ? body.length : 0) + " bytes (binary content)\n";
                     } else {
+                        String body = bodyCachingRequest.getRequestBodyString();
                         message += (body == null ? "" : "\n" + body + "\n");
                     }
+                    req = bodyCachingRequest;
                 }
             } else {
                 message = "" + req.getRemoteHost() + " made a non-HTTP request";

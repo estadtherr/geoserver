@@ -18,7 +18,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -28,7 +27,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.mail.internet.InternetHeaders;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMultipart;
-import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletResponse;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.geoserver.platform.Operation;
@@ -288,23 +286,6 @@ public class DispatcherTest {
                         public void setCharacterEncoding(String encoding) {
                             this.encoding = encoding;
                         }
-
-                        @Override
-                        @SuppressWarnings("PMD.CloseResource")
-                        public ServletInputStream getInputStream() {
-                            final ServletInputStream stream = super.getInputStream();
-                            return new ServletInputStream() {
-                                @Override
-                                public int read() throws IOException {
-                                    return stream.read();
-                                }
-
-                                @Override
-                                public int available() {
-                                    return body.length();
-                                }
-                            };
-                        }
                     };
 
             request.setScheme("http");
@@ -352,23 +333,6 @@ public class DispatcherTest {
                         @Override
                         public void setCharacterEncoding(String encoding) {
                             this.encoding = encoding;
-                        }
-
-                        @Override
-                        @SuppressWarnings("PMD.CloseResource")
-                        public ServletInputStream getInputStream() {
-                            final ServletInputStream stream = super.getInputStream();
-                            return new ServletInputStream() {
-                                @Override
-                                public int read() throws IOException {
-                                    return stream.read();
-                                }
-
-                                @Override
-                                public int available() {
-                                    return body.length();
-                                }
-                            };
                         }
                     };
 
