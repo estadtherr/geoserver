@@ -10,10 +10,13 @@
 
 package org.geoserver.gsr.model.map;
 
+import org.geoserver.gsr.model.geometry.GeometryTypeEnum;
+
 /** Basic information about a {@link LayerOrTable}, for use in service listings */
 public class LayerEntry {
     public final Integer id;
     public final String name;
+    public GeometryTypeEnum geometryType = null;
 
     public LayerEntry(int id, String name) {
         this.id = id;
@@ -26,5 +29,13 @@ public class LayerEntry {
 
     public String getName() {
         return name;
+    }
+
+    public GeometryTypeEnum getGeometryType() {
+        return geometryType;
+    }
+
+    public void setGeometryType(GeometryTypeEnum geometryType) {
+        this.geometryType = geometryType;
     }
 }

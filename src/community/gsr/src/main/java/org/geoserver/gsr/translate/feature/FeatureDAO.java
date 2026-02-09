@@ -323,7 +323,13 @@ public class FeatureDAO {
                             GeometryEncoder.toJts(sourceFeature.getGeometry()));
                     builder.add(geom);
                 } else if (attributeNames.contains(descriptor.getLocalName())) {
-                    builder.add(sourceFeature.getAttributes().get(descriptor.getLocalName()));
+                    Object featureAttrValue = sourceFeature.getAttributes().get(descriptor.getLocalName());
+                    // dates are encoded as integer milliseconds-since-epoch in the FeatureService API
+                    if (Date.class.isAssignableFrom(descriptor.getType().getBinding())
+                            && featureAttrValue instanceof Long) {
+                        featureAttrValue = new Date((Long) featureAttrValue);
+                    }
+                    builder.add(featureAttrValue);
                 } else {
                     builder.add(null);
                 }
@@ -422,7 +428,13 @@ public class FeatureDAO {
                     values.add(geom);
                 } else if (attributeNames.contains(descriptor.getLocalName())) {
                     names.add(descriptor.getName());
-                    values.add(sourceFeature.getAttributes().get(descriptor.getLocalName()));
+                    Object featureAttrValue = sourceFeature.getAttributes().get(descriptor.getLocalName());
+                    // dates are encoded as integer milliseconds-since-epoch in the FeatureService API
+                    if (Date.class.isAssignableFrom(descriptor.getType().getBinding())
+                            && featureAttrValue instanceof Long) {
+                        featureAttrValue = new Date((Long) featureAttrValue);
+                    }
+                    values.add(featureAttrValue);
                 }
             }
 

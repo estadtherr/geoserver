@@ -38,6 +38,7 @@ public class ServiceTest extends GeoServerSystemTestSupport {
                         "FeatureServerAddFeatures",
                         "FeatureServerApplyEdits",
                         "FeatureServerDeleteFeatures",
+                        "FeatureServerGetLayer",
                         "FeatureServerGetFeature",
                         "FeatureServerUpdateFeatures",
                         "FeatureServesApplyEdits",
