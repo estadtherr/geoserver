@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.logging.Logger;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -36,6 +37,10 @@ public class LoggingFilter implements GeoServerFilter {
 
     public static final String REQUEST_LOG_BUFFER_SIZE = "requestLogBufferSize";
 
+    /** subtypes of the "application" media type that can safely be interpreted as text */
+    private static final List<String> APPLICATION_MEDIA_TYPE_TEXT_SUBTYPES =
+            List.of("xml", "json", "gml", "html", "x-www-form-urlencoded");
+
     public static final Integer REQUEST_LOG_BUFFER_SIZE_DEFAULT = 1024;
 
     protected boolean enabled = false;
@@ -55,22 +60,25 @@ public class LoggingFilter implements GeoServerFilter {
      *
      * <p>At the time of writing used to suppress application/zip logging (which would render the console unusable).
      *
-     * @param contentType
-     * @return
+     * @param contentType Media type (formerly MIME type) of body content
+     * @return Whether content type indicates binary content (which therefore shouldn't be logged)
      */
     protected boolean isBinary(String contentType) {
         if (contentType == null) {
             return true;
         }
         int sub = contentType.indexOf('/');
-        String mimeType =
+        String mediaType =
                 sub == -1 ? contentType : contentType.substring(0, sub).toLowerCase();
         String subType = sub == -1 ? "" : contentType.substring(sub + 1).toLowerCase();
 
-        if (mimeType.equals("image") && !subType.contains("svg")) {
+        if (mediaType.equals("image") && !subType.contains("svg")) {
             return true;
-        } else if ("application".equals(mimeType)
-                && !(subType.contains("xml") || subType.contains("json") || subType.contains("gml"))) {
+        } else if ("application".equals(mediaType)
+                && APPLICATION_MEDIA_TYPE_TEXT_SUBTYPES.stream().noneMatch(subType::contains)) {
+            return true;
+        } else if (mediaType.equals("multipart")) {
+            // probably a file upload - assume binary to prevent binary part content from spamming the log output
             return true;
         } else {
             return false; // assume text by default
@@ -100,8 +108,8 @@ public class LoggingFilter implements GeoServerFilter {
                     : REQUEST_LOG_BUFFER_SIZE_DEFAULT;
         }
 
-        String message = "";
-        String body = null;
+        StringBuilder message;
+        String body;
         String path = "";
 
         if (enabled) {
@@ -113,17 +121,19 @@ public class LoggingFilter implements GeoServerFilter {
                 }
                 path += "\"";
 
-                message = "" + path;
-                message += " \"" + noNull(hreq.getHeader("User-Agent"));
-                message += "\" \"" + noNull(hreq.getHeader("Referer"));
-                message += "\" \"" + noNull(hreq.getHeader("Content-type")) + "\" ";
+                message = new StringBuilder(path);
+                message.append(" \"").append(noNull(hreq.getHeader("User-Agent")));
+                message.append("\" \"").append(noNull(hreq.getHeader("Referer")));
+                message.append("\" \"")
+                        .append(noNull(hreq.getHeader("Content-type")))
+                        .append("\" ");
 
                 if (logHeaders) {
                     Enumeration<String> headerNames = hreq.getHeaderNames();
-                    message += "\n  Headers:";
+                    message.append("\n  Headers:");
                     while (headerNames.hasMoreElements()) {
                         String headerName = headerNames.nextElement();
-                        message += "\n    " + headerName + ": " + hreq.getHeader(headerName);
+                        message.append("\n    ").append(headerName).append(": ").append(hreq.getHeader(headerName));
                     }
                 }
 
@@ -132,8 +142,8 @@ public class LoggingFilter implements GeoServerFilter {
                         && (hreq.getMethod().equals("PUT")
                                 || hreq.getMethod().equals("POST")
                                 || hreq.getMethod().equals("PATCH"))) {
-                    message += " request-size: " + hreq.getContentLength();
-                    message += " body: ";
+                    message.append(" request-size: ").append(hreq.getContentLength());
+                    message.append(" body: ");
 
                     String encoding = hreq.getCharacterEncoding();
                     if (encoding == null) {
@@ -148,7 +158,8 @@ public class LoggingFilter implements GeoServerFilter {
                     try {
                         charset = Charset.forName(encoding);
                     } catch (IllegalCharsetNameException icn) {
-                        logger.info("Request character set not recognized, using default character set");
+                        logger.info(
+                                "Request character set (" + encoding + ") not recognized, using default character set");
                     }
                     float maxBytesPerCharacter = charset.newEncoder().maxBytesPerChar();
                     int byteSize = (int) (requestLogBufferSize * maxBytesPerCharacter);
@@ -162,15 +173,15 @@ public class LoggingFilter implements GeoServerFilter {
                     req = new BufferedRequestWrapper(hreq, encoding, bufferedStream);
 
                     if (isBinary(hreq.getHeader("Content-type"))) {
-                        message += " bytes (binary content)\n";
+                        message.append(" bytes (binary content)\n");
                     } else {
-                        message += (body == null ? "" : "\n" + body + "\n");
+                        message.append("\n").append(body).append("\n");
                     }
                 }
             } else {
-                message = "" + req.getRemoteHost() + " made a non-HTTP request";
+                message = new StringBuilder(req.getRemoteHost() + " made a non-HTTP request");
             }
-            logger.info(message);
+            logger.info(message.toString());
 
             long startTime = System.currentTimeMillis();
             chain.doFilter(req, res);

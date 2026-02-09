@@ -45,7 +45,7 @@ public class FeatureController extends AbstractGSRController {
         super(geoServer);
     }
 
-    @GetMapping(path = "/{layerId}/{featureId}", name = "MapServerGetLegend")
+    @GetMapping(path = "/{layerId}/{featureId}", name = "FeatureServerGetFeature")
     @HTMLResponseBody(templateName = "featureitem.ftl", fileName = "featureitem.html")
     public FeatureWrapper getFeature(
             @PathVariable String workspaceName, @PathVariable Integer layerId, @PathVariable String featureId)

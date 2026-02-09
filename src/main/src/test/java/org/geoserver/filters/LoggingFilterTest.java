@@ -58,6 +58,7 @@ public class LoggingFilterTest {
     private static String expectedLogPart = "took";
     private static String expectedHeadersLogPart = "Headers:";
     private static String expectedBodyLogPart = "body:";
+    private static final String binaryContentPlaceholder = "(binary content)";
 
     @Before
     public void setup() {
@@ -208,6 +209,20 @@ public class LoggingFilterTest {
         assertTrue(capturedLog.contains(expectedBodyLogPart));
     }
 
+    @Test
+    public void testBinaryContentLogging() throws IOException, ServletException {
+        String capturedLog =
+                getLog("true", "true", "false", REQUEST_LOG_BUFFER_SIZE_DEFAULT, "application/octet-stream");
+        assertTrue(capturedLog.contains(binaryContentPlaceholder));
+    }
+
+    @Test
+    public void testNonBinaryContentLogging() throws IOException, ServletException {
+        String capturedLog =
+                getLog("true", "true", "false", REQUEST_LOG_BUFFER_SIZE_DEFAULT, "application/x-www-form-urlencoded");
+        assertFalse(capturedLog.contains(binaryContentPlaceholder));
+    }
+
     private String getTestCapturedLog() throws IOException {
         customLogHandler.flush();
         return logCapturingStream.toString();
@@ -215,10 +230,20 @@ public class LoggingFilterTest {
 
     private String getLog(String requestsEnabled, String bodiesEnabled, String headersEnabled, Integer logBufferSize)
             throws IOException, ServletException {
+        return getLog(requestsEnabled, bodiesEnabled, headersEnabled, logBufferSize, MediaType.TEXT_PLAIN_VALUE);
+    }
+
+    private String getLog(
+            String requestsEnabled,
+            String bodiesEnabled,
+            String headersEnabled,
+            Integer logBufferSize,
+            String contentMediaType)
+            throws IOException, ServletException {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setMethod("POST");
-        String generatedString = RandomStringUtils.randomAlphabetic(10);
-        request.setContentType(MediaType.TEXT_PLAIN_VALUE);
+        String generatedString = RandomStringUtils.randomAlphabetic(16);
+        request.setContentType(contentMediaType);
         request.setContent(generatedString.getBytes(StandardCharsets.UTF_8));
         MockHttpServletResponse response = new MockHttpServletResponse();
         LoggingFilter filter = getLoggingFilter(requestsEnabled, bodiesEnabled, headersEnabled, logBufferSize);

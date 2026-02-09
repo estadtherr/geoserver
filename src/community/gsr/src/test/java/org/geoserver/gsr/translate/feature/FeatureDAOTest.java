@@ -19,6 +19,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import org.geoserver.catalog.Catalog;
@@ -27,6 +28,7 @@ import org.geoserver.data.test.MockData;
 import org.geoserver.gsr.api.ServiceException;
 import org.geoserver.gsr.model.feature.EditResult;
 import org.geoserver.gsr.model.feature.Feature;
+import org.geoserver.gsr.model.geometry.Point;
 import org.geoserver.gsr.model.geometry.Polyline;
 import org.geoserver.gsr.model.geometry.SpatialReferenceWKID;
 import org.geoserver.gsr.translate.geometry.GeometryEncoder;
@@ -84,6 +86,58 @@ public class FeatureDAOTest extends GeoServerSystemTestSupport {
         // reported id should be compatible with actual id
         assertEquals(
                 FeatureEncoder.toGSRObjectId(iterator.next().getIdentifier().getID()), result.getObjectId());
+    }
+
+    @Test
+    public void testCreateFeatureWithDate() throws IOException, ServiceException {
+        Catalog catalog = getCatalog();
+        FeatureTypeInfo fti = catalog.getFeatureTypeByName("sf", "PrimitiveGeoFeature");
+        assertEquals(
+                "there should be 5 points in the test data set",
+                5,
+                fti.getFeatureSource(null, null).getFeatures().size());
+
+        // create feature from scratch
+        Point geom = new Point(-1.4, 50.9, new SpatialReferenceWKID(4326));
+
+        Map<String, Object> attributes = new HashMap<>();
+        attributes.put("description", "testCreateFeatureWithDate test");
+        attributes.put("name", "test feature name");
+        attributes.put("curveProperty", null);
+        attributes.put("uriProperty", "https://example.com");
+        attributes.put("dateProperty", null);
+        attributes.put("booleanProperty", false);
+        attributes.put("intProperty", 8989);
+        attributes.put("pointProperty", null);
+        attributes.put("measurand", 2.1);
+        attributes.put("decimalProperty", 6.5);
+        Date testDate = new Date(System.currentTimeMillis());
+        attributes.put("dateTimeProperty", testDate.getTime());
+
+        Feature feature = new Feature(geom, attributes, "1");
+
+        EditResult result = FeatureDAO.createFeature(fti, FeatureDAO.featureStore(fti), feature);
+        assertNotNull(result.getObjectId());
+        assertNotEquals(0L, (long) result.getObjectId());
+
+        assertEquals(
+                "there should now be 6 features in the feature source",
+                6,
+                fti.getFeatureSource(null, null).getFeatures().size());
+
+        FeatureIterator<? extends org.geotools.api.feature.Feature> iterator =
+                fti.getFeatureSource(null, null).getFeatures().features();
+        // initial 5 features from test dataset
+        for (int i = 0; i < 5; i++) {
+            iterator.next();
+        }
+        // reported id should be compatible with actual id
+        org.geotools.api.feature.Feature storedFeature = iterator.next();
+        assertEquals(FeatureEncoder.toGSRObjectId(storedFeature.getIdentifier().getID()), result.getObjectId());
+        assertEquals(
+                "date in stored feature should match initial value",
+                testDate,
+                storedFeature.getProperty("dateTimeProperty").getValue());
     }
 
     @Test

@@ -51,7 +51,7 @@ public class FeatureLayerController extends AbstractGSRController {
     }
 
     @ResponseBody
-    @GetMapping(path = "/{layerId}", name = "FeatureServerGetFeature")
+    @GetMapping(path = "/{layerId}", name = "FeatureServerGetLayer")
     @HTMLResponseBody(templateName = "featurelayer.ftl", fileName = "featurelayer.html")
     public FeatureLayer featureGet(@PathVariable String workspaceName, @PathVariable Integer layerId)
             throws IOException {
